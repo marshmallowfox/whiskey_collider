@@ -1,0 +1,76 @@
+services:
+  postgres:
+    container_name: postgres
+    build:
+      context: docker/Postgres
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: app
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/Postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+      - ./docker/Postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+    command:
+      [
+        "postgres",
+        "-c", "config_file=/etc/postgresql/postgresql.conf"
+      ]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    build:
+      context: ./docker/Redis
+      dockerfile: Dockerfile
+    container_name: redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+      - ./docker/Redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    sysctls:
+      net.core.somaxconn: "511"
+    command: [
+      "redis-server",
+      "/usr/local/etc/redis/redis.conf"
+    ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+  
+  app:
+    container_name: app
+    ports:
+      - "80:80"
+    build:
+      context: .
+      dockerfile: docker/Rust/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - .:/usr/src/app
+    working_dir: /usr/src/app
+    depends_on:
+      - postgres
+      - redis
+    stdin_open: true
+    tty: true
+    command: [ "bash" ]
+
+volumes:
+  pgdata:
+  redisdata:

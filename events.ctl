@@ -1,0 +1,5 @@
+TYPE      = CSV
+INPUT     = STDIN
+OUTPUT    = events
+DELIMITER = ,
+MULTI_PROCESS = YES
