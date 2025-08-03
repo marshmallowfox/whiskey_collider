@@ -1,7 +1,7 @@
 install:
 	make down
 	rm -rf ./target
-	docker compose up -d 
+	make up 
 	sleep 5
 	make migrate
 	make build
@@ -18,10 +18,10 @@ migrate:
 	docker compose exec app sqlx migrate run --source src/common/migrations
 
 run:
-	docker compose exec app cargo run --release
+	docker compose exec app ./target/release/w_collider
 
 seed:
-	docker compose exec app cargo run -- --release seeder
+	docker compose exec app ./target/release/w_collider seeder
 
 build:
 	docker compose exec app cargo build --release

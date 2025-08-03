@@ -45,7 +45,7 @@ pub async fn create_users(pool: &Pool<Postgres>) -> Result<Option<Vec<i64>>, any
 
     let mut ids: Vec<i64> = Vec::with_capacity(100);
     let mut names: Vec<String> = Vec::with_capacity(100);
-    (1..=100).for_each(|i| {
+    (1..=1000).for_each(|i| {
         let id = next_id();
         let name = names_array[i % names_len];
 
