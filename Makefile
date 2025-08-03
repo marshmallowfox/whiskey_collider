@@ -21,7 +21,7 @@ run:
 	docker compose exec app cargo run --release
 
 seed:
-	# docker compose exec app cargo run -- --release seed
+	docker compose exec app cargo run -- --release seeder
 
 build:
 	docker compose exec app cargo build --release
